@@ -1,3 +1,6 @@
+#!/usr/bin/node
+
+
 //bring variables from mongodb: cost, length, width
 //map-reduce to extract keys=values
 //define function area as sum of length * width to get metres squared
@@ -14,7 +17,8 @@ var MongoClient=require('mongodb').MongoClient,
 var url='mongodb://localhost:27017/esme';
 MongoClient.connect(url,function(err, db) {
     assert.equal(null,err);
-	db.collection('orders').find({
+    var orders=db.collection('order');
+	orders.find({
 			'attributes.width':{$exists: true},
 			'attributes.length':{$exists: true},
 			'cost':{$exists: true}
@@ -24,12 +28,15 @@ MongoClient.connect(url,function(err, db) {
 		console.dir(results);
 		for(var i=0; i<results.length; i++){
 			
-			var sqaam=(results[i].attributes.length*results[i].attributes.width)/(1000*1000);
-			var sqaamPreez=results[i].cost/sqaam;
+			results[i].sqm=(results[i].attributes.length*results[i].attributes.width)/(1000*1000);
+			results[i].ppsqm=results[i].cost/results[i].sqm;
 
-			console.log('r',results[i].cost,results[i].attributes.length,results[i].attributes.width,sqaam+'sqm',sqaamPreez+'GBP');
+			console.log('r',results[i]._id,results[i].cost,results[i].attributes.length,results[i].attributes.width,results[i].sqm+'sqm',results[i].ppsqm+'GBP');
+			orders.save(results[i]);
 		}
-		process.exit();
+
 	});
 });
 
+// var freeDom = compare(function)
+// results.compare.freeDom
